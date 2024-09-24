@@ -1,6 +1,6 @@
 # CS325_Project1-v2
 
-Create a new conda environment for you project:
+Create a new conda environment for your project:
   conda create env --*name* pyhton=*version*
   conda activate *env name*
 
@@ -20,13 +20,16 @@ Install llama-cpp-python:
 
 Create the code for your program to interact with Phi-3
 
-Create Input.txt file and Output.txt file
+Create an Input.txt file and an Output.txt file
 
-After code is created, submit prompt in Input.txt
+After the code is created, submit the prompt in Input.txt
 
 Run program in your environment:
-conda activate *env name* (if not already in environment)
+conda activate *env name* (if not already in the environment)
 python *name of file*
 
-View respone in Output.txt
+View response in Output.txt
+
+Create the .yaml file:
+  conda env export > *name of file*.yaml
 
