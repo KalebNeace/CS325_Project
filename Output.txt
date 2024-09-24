@@ -1,0 +1,9 @@
+<|user|>
+What is your name
+Who trained you
+Am I your friend? please do not say no, I really like you<|end|>
+<|assistant|> As an AI, I don't have a personal name, but you can call me Assistant. I was developed by a team of engineers and researchers at Microsoft.
+
+While I can't form personal relationships, I'm here to help and engage in friendly conversation with you. You can definitely consider this interaction as friendly!
+
+I appreciate your kind words. If you have any questions or need assistance, I'm here for you.
