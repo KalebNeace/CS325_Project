@@ -14,23 +14,24 @@ def scrape_comments(url):
             # Debug: Print the HTML structure
             # print(soup.prettify())  # Uncomment to see the full HTML structure
 
-            reviews = soup.select('.s-item__reviews')
+            reviews = soup.select('.fdbk-container__details__top')
             for review in reviews:
                 comments.append(review.get_text(strip=True))
 
+
             # Find the link for the next page
-            next_page = soup.select_one('.s-item__reviews')
+            next_page = soup.select_one('.pagination__items a')
             if next_page:
-                print("Found next page:", next_page['href'])
+                #print("Found next page:", next_page['href'])
                 url = next_page['href']
             else:
-                print("No next page found.")
+                #print("No next page found.")
                 url = None
 
             # Delay to avoid overwhelming the server
             time.sleep(1)  # Adjust the sleep duration as needed
         except Exception as e:
-            print(f"Error fetching {url}: {e}")
+            #print(f"Error fetching {url}: {e}")
             break
     print(f"Collected {len(comments)} comments.")
     return comments
@@ -39,7 +40,7 @@ def scrape_comments(url):
 def save_comments(version, comments):
     with open(f'{version}_comments.txt', 'w', encoding='utf-8') as file:
         for comment in comments:
-            file.write(comment + '\n')
+            file.write('-' + comment + '\n' + '\n')
 
 
 def read_urls_from_file(filename):
@@ -49,8 +50,10 @@ def read_urls_from_file(filename):
 
 # Read URLs from the file
 urls = read_urls_from_file('Links.txt')
+version = ["s22","s21","s20","s10"]
+count = 0
 
 for url in urls:
-    version = url.split('=')[-1]  # Assuming version is part of the URL
     comments = scrape_comments(url)
-    save_comments(version, comments)
+    save_comments(version[count], comments)
+    count += 1
