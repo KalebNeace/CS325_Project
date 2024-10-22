@@ -22,16 +22,16 @@ def scrape_comments(url):
             # Find the link for the next page
             next_page = soup.select_one('.pagination__items a')
             if next_page:
-                #print("Found next page:", next_page['href'])
+                print("Found next page:", next_page['href'])
                 url = next_page['href']
             else:
-                #print("No next page found.")
+                print("No next page found.")
                 url = None
 
             # Delay to avoid overwhelming the server
             time.sleep(1)  # Adjust the sleep duration as needed
         except Exception as e:
-            #print(f"Error fetching {url}: {e}")
+            print(f"Error fetching {url}: {e}")
             break
     print(f"Collected {len(comments)} comments.")
     return comments
