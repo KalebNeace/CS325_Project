@@ -1,8 +1,8 @@
 # Project 2
-Description:
+# Description:
 - This project creates a .txt file containing the feedback comments of a particular posting from the links provided
 
-Instructions:
+# Instructions:
 - Create a conda environment to download the needed packages and run the program in
     - conda create -name "name of the environment" python = "python version"
 - Activate the environment
