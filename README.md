@@ -1,4 +1,3 @@
-# Project 2
 # Description:
 - This project creates a .txt file containing the feedback comments of a particular posting from the links provided
 
