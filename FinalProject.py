@@ -5,6 +5,7 @@ import os
 from llama_cpp import Llama
 import matplotlib.pyplot as plt
 from urllib.parse import urljoin
+import numpy as np
 
 class CommentScraper:
     def __init__(self, model_path, max_comments=35, retries=3):
@@ -92,12 +93,12 @@ class CommentScraper:
             print(f"Error with Llama sentiment analysis: {e}")
             return "neutral"
 
-    # Save comments and their sentiments to 'comments.txt'
-    def save_comments_with_sentiment(self, comments, sentiments):
-        with open('comments.txt', 'a', encoding='utf-8') as file:  # Open in append mode
+    # Save comments and their sentiments to a separate file for each URL
+    def save_comments_with_sentiment(self, comments, sentiments, filename):
+        with open(filename, 'w', encoding='utf-8') as file:  # Open in write mode (not append)
             for comment, sentiment in zip(comments, sentiments):
                 file.write(f"Comment: {comment}\nSentiment: {sentiment}\n\n")
-        print(f"Appended {len(comments)} comments and sentiments to 'comments.txt'.")
+        print(f"Saved comments and sentiments to '{filename}'.")
 
     # Read URLs from the file
     @staticmethod
@@ -110,32 +111,60 @@ class CommentScraper:
             return []
 
     # Function to create and display a sentiment bar graph for each URL
-    def create_sentiment_graph(self, url, sentiments):
-        # Count the occurrences of each sentiment type
-        sentiment_counts = {'positive': 0, 'negative': 0, 'neutral': 0}
-        for sentiment in sentiments:
-            if sentiment in sentiment_counts:
-                sentiment_counts[sentiment] += 1
-        
-        # Plot the bar graph
-        labels = sentiment_counts.keys()
-        values = sentiment_counts.values()
+    def create_sentiment_graph(self, urls, all_sentiments, url_to_filename_mapping):
+        # Prepare the data for plotting
+        sentiment_counts_per_url = []
 
-        plt.figure(figsize=(8, 6))
-        plt.bar(labels, values, color=['green', 'red', 'gray'])
-        plt.title(f"Sentiment Analysis Graph")
-        plt.xlabel("Sentiment")
-        plt.ylabel("Number of Comments")
+        # Calculate sentiment counts for each URL
+        for sentiments in all_sentiments:
+            sentiment_counts = {'positive': 0, 'negative': 0, 'neutral': 0}
+            for sentiment in sentiments:
+                if sentiment in sentiment_counts:
+                    sentiment_counts[sentiment] += 1
+            sentiment_counts_per_url.append(sentiment_counts)
+
+        # Create an index for each group of bars (representing each URL)
+        num_urls = len(urls)
+        bar_width = 0.2  # Width of each bar in the group
+        index = np.arange(num_urls)  # X-axis positions for each URL group
+
+        # Set up the figure
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        # Create the bars for each sentiment (positive, negative, neutral)
+        positive_counts = [counts['positive'] for counts in sentiment_counts_per_url]
+        negative_counts = [counts['negative'] for counts in sentiment_counts_per_url]
+        neutral_counts = [counts['neutral'] for counts in sentiment_counts_per_url]
+
+        # Plot bars for each sentiment type
+        ax.bar(index - bar_width, positive_counts, bar_width, label='Positive', color='green')
+        ax.bar(index, negative_counts, bar_width, label='Negative', color='red')
+        ax.bar(index + bar_width, neutral_counts, bar_width, label='Neutral', color='gray')
+
+        # Use the URL-to-filename mapping for titles
+        mapped_titles = [url_to_filename_mapping.get(url, url) for url in urls]
+
+        # Add labels, title, and legend
+        ax.set_xlabel('URLs')
+        ax.set_ylabel('Number of Comments')
+        ax.set_title('Sentiment Distribution for Multiple URLs')
+        ax.set_xticks(index)
+        ax.set_xticklabels(mapped_titles, rotation=45, ha='right')
+        ax.legend()
+
+        # Adjust layout for better spacing
         plt.tight_layout()
 
-        # Save the graph to the current directory (no folder)
-        graph_filename = "sentiment_graph.png"
+        # Save the graph as a single PNG image
+        graph_filename = "combined_sentiment_graph.png"
         plt.savefig(graph_filename)
-        print(f"Saved sentiment graph as {graph_filename}")
+        print(f"Saved combined sentiment graph as {graph_filename}")
         plt.close()
 
     # Main function to execute the process for all URLs
-    def process_comments(self, urls):
+    def process_comments(self, urls, url_to_filename_mapping):
+        all_sentiments = []
+        
         for url in urls:
             print(f"Processing URL: {url}...")
             comments = self.scrape_comments(url)
@@ -143,26 +172,45 @@ class CommentScraper:
                 # Get sentiments for each comment
                 sentiments = [self.get_sentiment(comment) for comment in comments]
                 
-                # Append comments and sentiments to 'comments.txt'
-                self.save_comments_with_sentiment(comments, sentiments)
+                # Get the corresponding filename for this URL
+                filename = url_to_filename_mapping.get(url, "default_comments.txt")
                 
-                # Create and save the sentiment graph for the URL
-                self.create_sentiment_graph(url, sentiments)
+                # Save the comments and sentiments to a separate file
+                self.save_comments_with_sentiment(comments, sentiments, filename)
+                
+                # Append sentiments for this URL to the all_sentiments list
+                all_sentiments.append(sentiments)
             else:
                 print(f"No comments found for {url}.")
+                all_sentiments.append([])  # Add an empty list if no comments
 
-# Example of how to use the class:
+        # After processing all URLs, create the combined graph
+        self.create_sentiment_graph(urls, all_sentiments, url_to_filename_mapping)
+
+
 if __name__ == "__main__":
-    # Optionally, remove 'comments.txt' if it exists (start fresh)
-    if os.path.exists('comments.txt'):
-        os.remove('comments.txt')
+    # Remove existing files for a fresh start
+    filenames = ["galaxys22_comments.txt", "galaxys21_comments.txt", "galaxys20_comments.txt", "galaxys10_comments.txt"]
+    for filename in filenames:
+        if os.path.exists(filename):
+            os.remove(filename)
 
     # Initialize the scraper with model path
     scraper = CommentScraper(
-        model_path="./Phi-3-mini-4k-instruct-q4.gguf",  # Adjust model path if necessary
+        model_path="./Phi-3-mini-4k-instruct-q4.gguf"
     )
 
-    # Read URLs from a file and start the process
+    # Read URLs from the file and start the process
     urls = scraper.read_urls_from_file('Links.txt')
+    
+    # Define a mapping of URLs to their corresponding file names
+    url_to_filename_mapping = {
+        "https://www.ebay.com/fdbk/mweb_profile?fdbkType=FeedbackReceivedAsSeller&item_id=125792100860&username=everythingforlesss&filter=feedback_page%3ARECEIVED_AS_SELLER&q=125792100860&sort=RELEVANCE&page_id_item=1&sort_item=TIME&filter_image_item=false": "galaxys22_comments.txt",
+        "https://www.ebay.com/fdbk/mweb_profile?fdbkType=FeedbackReceivedAsSeller&item_id=125641047454&username=everythingforlesss&filter=feedback_page%3ARECEIVED_AS_SELLER&q=125641047454&sort=RELEVANCE&page_id_item=1&sort_item=TIME&filter_image_item=false": "galaxys21_comments.txt",
+        "https://www.ebay.com/fdbk/mweb_profile?fdbkType=FeedbackReceivedAsSeller&item_id=116088694961&username=everythingforlesss&filter=feedback_page%3ARECEIVED_AS_SELLER&q=116088694961&sort=RELEVANCE": "galaxys20_comments.txt",
+        "https://www.ebay.com/fdbk/mweb_profile?fdbkType=FeedbackReceivedAsSeller&item_id=254497146992&username=cellfeee&filter=feedback_page%3ARECEIVED_AS_SELLER&q=254497146992&sort=RELEVANCE&page_id_item=1&sort_item=TIME&filter_image_item=false": "galaxys10_comments.txt",
+    }
+    
     if urls:
-        scraper.process_comments(urls)
+        scraper.process_comments(urls, url_to_filename_mapping)
+
