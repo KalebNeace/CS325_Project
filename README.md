@@ -1,12 +1,13 @@
 # Sentiment Analyzer
 
-
+## Description
+  This project scraps the comments from a given website and analyzes the sentiment to determine if the comments are positive, negative, or neutral. The comments are then saved within a text file with the proper sentiment. Lastly the program makes a graph to help visualize the data from the comments.
 
 
 ## Setup - Installing required packages
 
 - Create a new conda environment for your project:
-  - conda create env --*env name* python=3.9
+  - conda create env --*env name* python=3.12
   - conda activate *env name*
 
 - Install Hugging Face CLI:
@@ -33,8 +34,14 @@
 - Install pytest
     - pip install pytest
 
+## Instructions
+   - Paste the desired link within the Links.txt file
+   - make sure you are in the proper conda environment with "conda activate *name of environment*
+   - run the program in the terminal with python *Name of file*
+   - View the results in the created .txt files and with the created graph
+
  
-  
-![My Image](combined_sentiment_graph.png)
+ ##  Example of graph
+ ![My Image](combined_sentiment_graph.png)
 
 
