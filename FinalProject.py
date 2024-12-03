@@ -1,3 +1,8 @@
+# Kaleb Neace
+# This program reads in links from Links.txt, then it navigates and pull the comments from those links. Next, it passes the comments into Phi-3
+# and analyzes the sentiment of the comments. The comments and sentiments are saved in a text file specific to it's link.
+# Lastly it creates a graph to visualizes the data from each link.
+
 import requests
 from bs4 import BeautifulSoup
 import time
@@ -30,7 +35,7 @@ class CommentScraper:
                 response.raise_for_status()  # Raise an exception for HTTP errors
                 soup = BeautifulSoup(response.text, 'html.parser')
 
-                # Extract comments (Adjust class selector as needed)
+                # Extract comments
                 reviews = soup.select('.fdbk-container__details__top')
                 for review in reviews:
                     comment_text = review.get_text(strip=True)
@@ -95,7 +100,7 @@ class CommentScraper:
 
     # Save comments and their sentiments to a separate file for each URL
     def save_comments_with_sentiment(self, comments, sentiments, filename):
-        with open(filename, 'w', encoding='utf-8') as file:  # Open in write mode (not append)
+        with open(filename, 'w', encoding='utf-8') as file: 
             for comment, sentiment in zip(comments, sentiments):
                 file.write(f"Comment: {comment}\nSentiment: {sentiment}\n\n")
         print(f"Saved comments and sentiments to '{filename}'.")
