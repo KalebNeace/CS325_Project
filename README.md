@@ -8,6 +8,7 @@ Author: Kaleb Neace
 ## Setup - Installing required packages
 
 - Create a new conda environment for your project:
+- ```bash
   - conda create env --*env name* python=3.12
   - conda activate *env name*
 
@@ -43,9 +44,10 @@ Author: Kaleb Neace
   pip install pytest
 
 ## Instructions
-   - Paste the desired link within the 'Links.txt' file
-   - make sure you are in the proper conda environment with "conda activate *name of environment*
-   - run the program in the terminal with python *Name of file*
+   - Paste the desired link within the `Links.txt` file
+   - Run the program in the terminal with
+     ```bash
+     python FinalProject.py
    - View the results in the created .txt files and with the created graph
 
  
